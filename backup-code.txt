@@ -1,0 +1,6 @@
+# Safe for late
+    # print(f"Turning on {dev.name}...")
+    # await dev.async_turn_on(channel=0)
+    # print(f"Turing off {dev.name}")
+    # await dev.async_turn_off(channel=0)
+    # await asyncio.sleep(5)
