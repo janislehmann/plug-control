@@ -24,8 +24,7 @@ async def get_desired_plug(manager: MerossManager, name_of_desired_plug: str) ->
             await plug.async_update()
             return plug
         else:
-            print(f"No plug with name {name_of_desired_plug} found")
-            exit(1)
+            raise Exception(f"No plug with name {name_of_desired_plug} found")
 
 async def get_plug_current(plug: ToggleXMixin) -> float:
     data = await plug.async_get_instant_metrics(channel=0)
@@ -58,7 +57,13 @@ async def main():
     current_threshold = 0.1
 
     manager, http_api_client = await init_meross_session()
-    plug = await get_desired_plug(manager, "Waschmaschine")
+
+    try:
+        plug = await get_desired_plug(manager, "Waschmaschine")
+
+    except:
+        await close_meross_session(manager, http_api_client)
+        
 
     if not plug.is_on():
         await plug.async_turn_on(channel=0)
@@ -79,8 +84,9 @@ async def main():
         print("nothing to do")
 
     else:
-        print("something went wrong")
-        # todo: check what to do here
+        print("It semese the state file is corrupted")
+        await close_meross_session(manager, http_api_client)
+        exit(1)
 
     await close_meross_session(manager, http_api_client)
     
