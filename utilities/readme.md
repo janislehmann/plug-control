@@ -8,23 +8,23 @@ Um dauerhafte Umgebungsvariablen unter Ubuntu zu erstellen, die nach einem Neust
 
 2. Um ".bashrc" zu bearbeiten, geben Sie den folgenden Befehl im Terminal ein und drücken Sie Enter:
 
-```bash
-vim ~/.bashrc
-```
+    ```bash
+    vim ~/.bashrc
+    ```
 
 4. Am Ende der Datei können die Umgebungsvariablen hinzufügen. 
 
-```bash
-export MEROSS_EMAIL="test@test.com"
-export MEROSS_PASSWORD="pass"
-export TELEGRAM_TOKEN="pass"
-```
+    ```bash
+    export MEROSS_EMAIL="test@test.com"
+    export MEROSS_PASSWORD="pass"
+    export TELEGRAM_TOKEN="pass"
+    ```
 
 5. Damit die Änderungen wirksam werden, laden Sie Ihre Umgebungsvariablen neu, indem Sie den folgenden Befehl eingeben:
 
-```bash
-source ~/.bashrc
-```
+    ```bash
+    source ~/.bashrc
+    ```
 
 
 
@@ -42,7 +42,7 @@ Um einen Daemon unter Ubuntu zu erstellen, der alle 5 Minuten einen bestimmten C
 
 1. **Bash-Skript erstellen**: 
 
-Erstelle ein Bash-Skript, das deinen Code ausführt:
+    Erstelle ein Bash-Skript, das deinen Code ausführt:
 
    ```bash
    #!/bin/bash
