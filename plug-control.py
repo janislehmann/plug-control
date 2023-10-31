@@ -43,13 +43,13 @@ def send_telegram_message(text: str) -> None:
     requests.post(message)
 
 def read_state_file() -> str:
-    with open("state.txt", "r") as file:
+    with open("/home/pi/code/plug-control/state.txt", "r") as file:
         state = file.read()
     file.close()
     return state
 
 def write_state_file(new_state: str) -> None:
-    with open("state.txt", "w") as file:
+    with open("/home/pi/code/plug-control/state.txt", "w") as file:
         file.write(new_state)
     file.close()
 

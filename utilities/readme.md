@@ -70,14 +70,20 @@ Um einen Daemon unter Ubuntu zu erstellen, der alle 5 Minuten einen bestimmten C
    sudo vim /etc/systemd/system/plug-daemon.service
    ```
 
-   Füge folgenden Inhalt ein:
+   Füge folgenden Inhalt ein und update die Environment varables mit dem secrets
 
    ```plaintext
     [Unit]
     Description=Plug Daemon
+    After=network.target
 
     [Service]
     Type=simple
+    User=pi
+    Group=pi
+    Environment=MEROSS_EMAIL="mail@mail.com"
+    Environment=MEROSS_PASSWORD="pass"
+    Environment=TELEGRAM_TOKEN="pass"
     ExecStart=/home/pi/code/plug-control/plug-daemon.sh
 
     [Install]
