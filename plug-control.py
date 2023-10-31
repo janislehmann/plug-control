@@ -28,6 +28,7 @@ async def get_desired_plug(manager: MerossManager, name_of_desired_plug: str) ->
 
 async def get_plug_current(plug: ToggleXMixin) -> float:
     data = await plug.async_get_instant_metrics(channel=0)
+    print(data)
     return data.current
 
 async def close_meross_session(manager: MerossManager, http_api_client: MerossHttpClient) -> None:
@@ -35,7 +36,7 @@ async def close_meross_session(manager: MerossManager, http_api_client: MerossHt
     await http_api_client.async_logout()
  
 def send_telegram_message(text: str) -> None:
-    chatid = "964534700"
+    chatid = "-1002091987975"
     token = os.environ.get("TELEGRAM_TOKEN")
 
     message = f"https://api.telegram.org/{token}/sendMessage?chat_id={chatid}&text={text}"
@@ -54,7 +55,7 @@ def write_state_file(new_state: str) -> None:
 
 async def main():
     previous_washing_machine_state = read_state_file()
-    current_threshold = 0.1
+    current_threshold = 0.2
 
     manager, http_api_client = await init_meross_session()
 
@@ -64,20 +65,17 @@ async def main():
     except:
         await close_meross_session(manager, http_api_client)
         
-
-    if not plug.is_on():
-        await plug.async_turn_on(channel=0)
     
     plug_current = await get_plug_current(plug)
 
     if previous_washing_machine_state == "inactiv" and plug_current > current_threshold:
         print("Washing machine is now running")
-        send_telegram_message("Ich habe mit dem Waschen begonnen 🤖")
+        send_telegram_message("Ich habe mit dem Waschen begonnen 🧺🛁")
         write_state_file("active")
 
     elif previous_washing_machine_state == "active" and plug_current < current_threshold:
         print("Washing machine has been finished")
-        send_telegram_message("Ich bin fertig mit der Wäsche 👕")
+        send_telegram_message("Ich bin fertig mit der Wäsche 👕✨")
         write_state_file("inactiv")
 
     elif previous_washing_machine_state == "inactiv" and plug_current < current_threshold or previous_washing_machine_state == "active" and plug_current > 5:
