@@ -1,9 +1,11 @@
 import asyncio
 import os
+import requests
+import time
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 from meross_iot.controller.mixins.toggle import ToggleXMixin
-import requests
+
 
 async def init_meross_session() -> tuple[MerossManager, MerossHttpClient]:
     email = os.environ.get("MEROSS_EMAIL")
@@ -26,15 +28,20 @@ async def get_desired_plug(manager: MerossManager, name_of_desired_plug: str) ->
         else:
             raise Exception(f"No plug with name {name_of_desired_plug} found")
 
-async def get_plug_current(plug: ToggleXMixin) -> float:
-    data = await plug.async_get_instant_metrics(channel=0)
-    print(data)
-    return data.current
+async def get_plug_power(plug: ToggleXMixin) -> float:
+    power_sum = 0.0
+    for _ in range(15):
+        await plug.async_update()
+        data = await plug.async_get_instant_metrics(channel=0)
+        power_sum += data.power
+        time.sleep(1)
+
+    return round(power_sum/15, 2)
 
 async def close_meross_session(manager: MerossManager, http_api_client: MerossHttpClient) -> None:
     manager.close()
     await http_api_client.async_logout()
- 
+
 def send_telegram_message(text: str) -> None:
     chatid = "-1002091987975"
     token = os.environ.get("TELEGRAM_TOKEN")
@@ -55,7 +62,7 @@ def write_state_file(new_state: str) -> None:
 
 async def main():
     previous_washing_machine_state = read_state_file()
-    current_threshold = 0.2
+    power_threshold = 20
 
     manager, http_api_client = await init_meross_session()
 
@@ -66,19 +73,20 @@ async def main():
         await close_meross_session(manager, http_api_client)
         
     
-    plug_current = await get_plug_current(plug)
+    plug_power = await get_plug_power(plug)
+    print(plug_power)
 
-    if previous_washing_machine_state == "inactiv" and plug_current > current_threshold:
+    if previous_washing_machine_state == "inactiv" and plug_power > power_threshold:
         print("Washing machine is now running")
         send_telegram_message("Ich habe mit dem Waschen begonnen 🧺🛁")
         write_state_file("active")
 
-    elif previous_washing_machine_state == "active" and plug_current < current_threshold:
+    elif previous_washing_machine_state == "active" and plug_power < power_threshold:
         print("Washing machine has been finished")
         send_telegram_message("Ich bin fertig mit der Wäsche 👕✨")
         write_state_file("inactiv")
 
-    elif previous_washing_machine_state == "inactiv" and plug_current < current_threshold or previous_washing_machine_state == "active" and plug_current > 5:
+    elif previous_washing_machine_state == "inactiv" and plug_power < power_threshold or previous_washing_machine_state == "active" and plug_power > power_threshold:
         print("nothing to do")
 
     else:
@@ -87,7 +95,6 @@ async def main():
         exit(1)
 
     await close_meross_session(manager, http_api_client)
-    
 
 
 if __name__ == '__main__':
