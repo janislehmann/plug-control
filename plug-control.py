@@ -1,7 +1,7 @@
 import asyncio
 import os
-import requests
 import time
+import requests
 from meross_iot.http_api import MerossHttpClient
 from meross_iot.manager import MerossManager
 from meross_iot.controller.mixins.toggle import ToggleXMixin
@@ -16,6 +16,7 @@ async def init_meross_session() -> tuple[MerossManager, MerossHttpClient]:
     await manager.async_init()
     return manager, http_api_client
 
+
 async def get_desired_plug(manager: MerossManager, name_of_desired_plug: str) -> ToggleXMixin:
     await manager.async_device_discovery()
     available_plugs = manager.find_devices(device_type="mss315")
@@ -28,6 +29,7 @@ async def get_desired_plug(manager: MerossManager, name_of_desired_plug: str) ->
         else:
             raise Exception(f"No plug with name {name_of_desired_plug} found")
 
+
 async def get_plug_power(plug: ToggleXMixin) -> float:
     power_sum = 0.0
     for _ in range(15):
@@ -38,9 +40,11 @@ async def get_plug_power(plug: ToggleXMixin) -> float:
 
     return round(power_sum/15, 2)
 
+
 async def close_meross_session(manager: MerossManager, http_api_client: MerossHttpClient) -> None:
     manager.close()
     await http_api_client.async_logout()
+
 
 def send_telegram_message(text: str) -> None:
     chatid = "-1002091987975"
@@ -49,16 +53,19 @@ def send_telegram_message(text: str) -> None:
     message = f"https://api.telegram.org/{token}/sendMessage?chat_id={chatid}&text={text}"
     requests.post(message)
 
+
 def read_state_file() -> str:
     with open("/home/pi/code/plug-control/state.txt", "r") as file:
         state = file.read()
     file.close()
     return state
 
+
 def write_state_file(new_state: str) -> None:
     with open("/home/pi/code/plug-control/state.txt", "w") as file:
         file.write(new_state)
     file.close()
+
 
 async def main():
     previous_washing_machine_state = read_state_file()
@@ -66,13 +73,12 @@ async def main():
 
     manager, http_api_client = await init_meross_session()
 
-    try:
-        plug = await get_desired_plug(manager, "Waschmaschine")
+    # try:
+    plug = await get_desired_plug(manager, "Waschmaschine")
 
-    except:
-        await close_meross_session(manager, http_api_client)
+    # except:
+    #     await close_meross_session(manager, http_api_client)
         
-    
     plug_power = await get_plug_power(plug)
     print(plug_power)
 
